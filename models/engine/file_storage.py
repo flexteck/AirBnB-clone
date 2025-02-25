@@ -3,6 +3,7 @@
 
 import json
 from models.base_model import BaseModel
+from models.user import User
 
 
 class FileStorage:
@@ -38,6 +39,7 @@ class FileStorage:
                 obj_dict = json.load(file)
                 for key, obj_data in obj_dict.items():
                     class_name = obj_data["__class__"]
-                    self.__objects[key] = eval(class_name)(**obj_data)
+                    if class_name in globals():
+                        self.__objects[key] = globals()[class_name](**obj_data)
         except FileNotFoundError:
             pass
