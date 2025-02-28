@@ -9,6 +9,3 @@ class User(BaseModel):
     password = ""
     first_name = ""
     last_name = ""
-
-    """ initialization of instance """
-    super().__init__

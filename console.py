@@ -25,7 +25,15 @@ classes = {
 class   HBNBCommand(cmd.Cmd):
     """ Command interpreter for HBNB """
     prompt = '(hbnb) '
-    classes = {"BaseModel": BaseModel, "User": User}
+    classes = {
+    "BaseModel": BaseModel,
+    "User": User,
+    "State": State,
+    "City": City,
+    "Amenity": Amenity,
+    "Place": Place,
+    "Review": Review
+    }
 
     # ---- basic command ----
 
@@ -43,7 +51,7 @@ class   HBNBCommand(cmd.Cmd):
 
     def do_show(self, args):
         """ shows the string representation of an instance """
-        args = shlex.split(arg)
+        args = shlex.split(args)
         if len(args) == 0:
             print("** class name missing **")
             return
@@ -63,7 +71,7 @@ class   HBNBCommand(cmd.Cmd):
 
     def do_destroy(self, args):
         """ Delete an instance based on class name and id """
-         args = shlex.split(arg)
+        args = shlex.split(args)
         if len(args) == 0:
             print("** class name missing **")
             return
@@ -91,6 +99,68 @@ class   HBNBCommand(cmd.Cmd):
             return
         result = [str(obj) for key, obj in objects.items() if not arg or key.startswith(arg)]
         print(result)
+
+
+    def do_update(self, arg):
+        """ Updates an instance based on class name and id"""
+        args = shlex.split()
+
+        if not args:
+             print("** class name missing **")
+             return
+        
+        if args[0] not in classes:
+            print("** class doesn't exist **")
+            return
+
+        if args < 2:
+            print("** instance id missing **")
+            return
+
+        key = f"args[0].args[1]"
+        obj = storage.all().get(key)
+
+        if key is None:
+            print("** no instance found **")
+            return
+        if args < 3:
+            print("** attribute name missing **")
+            return
+        if len(args) < 4:
+            print("** value missing **")
+            return
+
+        attr_name = args[2]
+        attr_value = args[3]
+
+        if hasattr(obj, attr_name):
+            attr_type = type(getattr(attr_name))
+            try:
+                attr_value = attr_type(attr_value)
+            except ValueError:
+                pass
+        settattr(obj, attr_name, attr_value)
+        obj.save()
+
+
+    def default(self, line):
+        " Handles command in the format `<class name>.nethod()` """
+        args = line.split(".")
+
+        if len(args) == 2:
+            class_name, method_call = args
+
+            if class_name not in self.classes:
+                 print("** class does not exist **")
+                 return
+
+            if method_call == "all()":
+                return self.do_all(class_name)
+
+            print(f"*** Unknown syntax: {line}")
+        else:
+             print(f"*** Unknown syntax: {line}")
+
 
 
     def do_quit(self, line):
