@@ -156,8 +156,20 @@ class   HBNBCommand(cmd.Cmd):
 
             if method_call == "all()":
                 return self.do_all(class_name)
+            elif method_call == "count()":
+                count = sum(1 for key in storage.all().keys() if key.startswith(class_name))
+                print(count)
+                return
+            elif method_call.startswith("show(") and method_call.endswith(")"):
+                obj_id = method_call[5:-1]
+                return self.do_show(f"{class_name} {obj_id}")
 
-            print(f"*** Unknown syntax: {line}")
+            elif method_call.startswith("destroy(") and method_call.endswith(")"):
+                obj_id = method_call[8:-1]
+                return self.do_destroy(f"{class_name} {obj_id}")
+
+            else:
+                print(f"*** Unknown syntax: {line}")
         else:
              print(f"*** Unknown syntax: {line}")
 
