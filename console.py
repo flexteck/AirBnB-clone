@@ -103,7 +103,7 @@ class   HBNBCommand(cmd.Cmd):
 
     def do_update(self, arg):
         """ Updates an instance based on class name and id"""
-        args = shlex.split()
+        args = shlex.split(arg)
 
         if not args:
              print("** class name missing **")
@@ -113,7 +113,7 @@ class   HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
             return
 
-        if args < 2:
+        if len(args) < 2:
             print("** instance id missing **")
             return
 
@@ -123,7 +123,7 @@ class   HBNBCommand(cmd.Cmd):
         if key is None:
             print("** no instance found **")
             return
-        if args < 3:
+        if len(args) < 3:
             print("** attribute name missing **")
             return
         if len(args) < 4:
@@ -139,7 +139,7 @@ class   HBNBCommand(cmd.Cmd):
                 attr_value = attr_type(attr_value)
             except ValueError:
                 pass
-        settattr(obj, attr_name, attr_value)
+        setattr(obj, attr_name, attr_value)
         obj.save()
 
 
@@ -156,20 +156,38 @@ class   HBNBCommand(cmd.Cmd):
 
             if method_call == "all()":
                 return self.do_all(class_name)
+
             elif method_call == "count()":
                 count = sum(1 for key in storage.all().keys() if key.startswith(class_name))
                 print(count)
                 return
+
             elif method_call.startswith("show(") and method_call.endswith(")"):
                 obj_id = method_call[5:-1]
                 return self.do_show(f"{class_name} {obj_id}")
 
             elif method_call.startswith("destroy(") and method_call.endswith(")"):
                 obj_id = method_call[8:-1]
-                return self.do_destroy(f"{class_name} {obj_id}")
+                return self.do_show(f"{class_name} {obj_id}") 
+
+            elif method_call.startswith("update(") and method_call.endswith(")"):
+                args = shlex.split(method_call[7:-1])
+                
+                if len(args) == 2:
+                    obj_id = args[0].strip()
+                    obj_instance = args[1]
+
+                    for key, value in eval(obj_instance).items():
+                        arg = f"{class_name} {obj_id} {key} {value}"
+                        self.do_update(arg)
+                    return
+                elif len(args) == 3:
+                    obj_id, attr_name, attr_value = args[:3]
+                    self.do_update(f"{class_name} {obj_id} {attr_name} {attr_value}")
+                    return
 
             else:
-                print(f"*** Unknown syntax: {line}")
+                    print(f"*** Unknown syntax: {line}")
         else:
              print(f"*** Unknown syntax: {line}")
 
